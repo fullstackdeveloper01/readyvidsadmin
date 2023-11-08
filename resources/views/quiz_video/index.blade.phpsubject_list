@@ -1,0 +1,324 @@
+@extends('layouts.app', ['title' => __('Quiz Video')])
+
+@section('content')
+    <div class="header bg-gradient-primary pb-8 pt-5 pt-md-8">
+    </div>
+
+    <div class="container-fluid mt--7">
+        <div class="row">
+            <div class="col">
+                <div class="card shadow">
+                    <div class="card-header border-0">
+                        <div class="row align-items-center">
+                            <div class="col-6">
+                                <h3 class="mb-0">{{ __('Quiz Video') }}</h3>
+                            </div>
+                            <div class="col-6 text-right">
+                                <a href="{{ route('quiz_video.create') }}" class="btn btn-sm btn-primary">{{ __('Add Quiz Video') }}</a>
+                                 <a href="{{ route('quiz_video.bulk_upload') }}" class="btn btn-sm btn-primary">{{ __('Bulk Upload') }}</a>
+                                 <a href="{{ route('quiz_video.makesampledownload') }}" class="btn btn-sm btn-primary">{{ __('Make Sample Download') }}</a>
+                            </div>
+                            
+                        </div>
+                        <div class="row align-items-center">
+                            <div class="col-8">
+                                    <form method="get">
+                                        <div class="row">
+                                            <div class="col-4">
+                                                <div class="form-group{{ $errors->has('country_id') ? ' has-danger' : '' }}">
+                                                    <label class="form-control-label" for="country_id">{{ __('Country Name') }}</label>
+                                                    <select name="country_id" id="country_id" class="form-control form-control-alternative{{ $errors->has('country_id') ? ' is-invalid' : '' }}" required>
+                                                        <option value=""> -- </option>
+                                                    @foreach($countryList as $res)
+                                                        <option value="{{$res->id}}" @if(isset($_GET['country_id']) && $_GET['country_id']==$res->id) selected @endif>{{$res->country_name}}</option>
+                                                    @endforeach
+                                                    
+                                                    @if ($errors->has('country_id'))
+                                                        <span class="invalid-feedback" role="alert">
+                                                            <strong>{{ $errors->first('country_id') }}</strong>
+                                                        </span>
+                                                    @endif
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                 <div class="form-group{{ $errors->has('subject_id') ? ' has-danger' : '' }}">
+                                                    <label class="form-control-label" for="subject_id">{{ __('Subject') }}</label>
+                                                    <select name="subject_id" id="subject_id" class="form-control form-control-alternative{{ $errors->has('subject_id') ? ' is-invalid' : '' }}" required>
+                                                    <option value=""> -- </option>
+                                                   
+                                                    
+                                                    @if ($errors->has('subject_id'))
+                                                        <span class="invalid-feedback" role="alert">
+                                                            <strong>{{ $errors->first('subject_id') }}</strong>
+                                                        </span>
+                                                    @endif
+                                              
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                 <div class="form-group{{ $errors->has('topic_id') ? ' has-danger' : '' }}">
+                                                    <label class="form-control-label" for="topic_id">{{ __('Topic') }}</label>
+                                                    <select name="topic_id" id="topic_id" class="form-control form-control-alternative{{ $errors->has('topic_id') ? ' is-invalid' : '' }}" required>
+                                                    <option value=""> -- </option>
+                                                   
+                                                    
+                                                    @if ($errors->has('topic_id'))
+                                                        <span class="invalid-feedback" role="alert">
+                                                            <strong>{{ $errors->first('topic_id') }}</strong>
+                                                        </span>
+                                                    @endif
+                                              
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                   
+                                </div>
+                            <div class="col-4 text-right">   
+                                @php
+                                if(isset($_GET['category_id'])){
+                                    $category_id=$_GET['category_id'];
+                                }else{
+                                    $category_id='';
+                                }
+                                if(isset($_GET['subcategory_id'])){
+                                    $subcategory_id=$_GET['subcategory_id'];
+                                }else{
+                                    $subcategory_id='';
+                                }
+                                @endphp
+                                <a class="btn btn-sm btn-primary" href="{{ route('video.export') }}?category_id=<?=$category_id?>&subcategory_id=<?=$subcategory_id?>">Export</a>
+                                <button type="submit" class="btn btn-sm btn-primary">{{ __('Filter') }}</button>
+                                <a href="{{ route('video.index') }}" class="btn btn-sm btn-primary">{{ __('Clear Filter') }}</a>
+                            </div>
+                             </form>
+                        </div>
+                            
+                        
+                    </div>
+                    </div>
+
+                    <div class="col-12">
+                        @if (session('status'))
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                {{ session('status') }}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        @endif
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table align-items-center table-flush">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th scope="col">{{ __('Id') }}</th>
+                                    <th scope="col">{{ __('Country') }}</th>
+                                    <th scope="col">{{ __('Subject') }}</th>
+                                    <th scope="col">{{ __('Topic') }}</th>
+                                    <th scope="col">{{ __('Question') }}</th>
+                                    <th scope="col">{{ __('Answer') }}</th>
+                                    <th scope="col">{{ __('Question Speaker 1') }}</th>
+                                    <th scope="col">{{ __('Answer Speaker1') }}</th>
+                                    <th scope="col">{{ __('Status') }}</th>
+                                    <th scope="col" class="text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($videos  as $key=> $video)
+                                    <tr>
+                                        <td><a href="{{ route('video.edit', $video) }}">{{ $key+1 }}</a></td>
+                                        <td>{{$video->country_name}}</td>
+                                        <td>{{$video->subject_name}}</td>
+                                        <td>{{$video->topic_name}}</td>
+                                        <td>{{$video->question}}</td>
+                                        <td>{{$video->answer}}</td>
+                                        <td>
+                                            <audio controls="controls" src="{{ asset($video->audio1) }}" type="audio/*">
+                                            </audio>
+                                        </td>
+                                       
+                                        <td>
+                                            <audio controls="controls" src="{{ asset($video->answer_audio1) }}" type="audio/*">
+                                            </audio>
+                                        </td>
+                                       
+                                          @if($video->status==1)
+                                         <td>
+                                            <label class="switch">
+                                                <input type="checkbox" id="togBtn" onclick="changeStatus('quizVideoStatus','{{$video->id}}','0')" checked >
+                                                <div class="slider round"></div>
+                                            </label>
+                                        </td>
+                                        @else
+                                        <td>
+                                            <label class="switch">
+                                                <input type="checkbox" id="togBtn" onclick="changeStatus('quizVideoStatus','{{$video->id}}','1')" >
+                                                <div class="slider round"></div>
+                                            </label>
+                                        </td>
+                                        @endif
+                                        <td class="text-right">
+                                            <div class="dropdown">
+                                                <a class="btn btn-sm btn-icon-only text-light" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </a>
+                                                <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
+                                                   
+                                                    <a class="dropdown-item" href="{{ route('quiz_video.edit', $video) }}">{{ __('Edit') }}</a>
+                                                    <form action="{{ route('quiz_video.destroy', $video) }}" method="post">
+                                                        @csrf
+                                                        @method('delete')
+
+                                                        <button type="button" class="dropdown-item" onclick="confirm('{{ __("Are you sure you want to delete this video?") }}') ? this.parentElement.submit() : ''">
+                                                            {{ __('Delete') }}
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer py-4">
+                        @if(count($videos))
+                            <nav class="d-flex justify-content-end" aria-label="...">
+                                {{ $videos->appends(Request::all())->links() }}
+                            </nav>
+                        @else
+                            <h4>{{ __('You don`t have any video') }} ...</h4>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @include('layouts.footers.auth')
+    </div>
+     @php 
+       
+        if(isset($_GET['subject_id'])){
+            $subject_id = $_GET['subject_id'];
+        }else{
+            $subject_id='';
+        }
+        if(isset($_GET['country_id'])){
+             $country_id = $_GET['country_id'];
+        }else{
+           $country_id='';
+        }
+     @endphp
+@endsection
+@section('js')
+<script>
+    var subcategory_id="<?= $subcategory_id; ?>";
+    var country_id="<?= $country_id; ?>";
+    
+    if(subcategory_id){
+        var subcategoryselected='selected';
+    }else{
+       var subcategoryselected='';
+    }
+    var country_id = $("#country_id").val();
+    if(country_id==''){
+        country_id ='0';
+    }
+    
+    if(country_id!=0){
+     var base_url='<?php echo env('BASE_URL')?>';
+    //$('#preview_name').html($("#name option:selected").text());
+          $.ajax({
+        
+            method: 'get',
+        
+            url: base_url+'/subject_list/'+country_id,
+        
+          
+        
+        }).then(response => {
+        
+            if (response.status == true) {
+        
+                var result = response.data;
+              
+                
+                if(result.length>0){
+                    var subjecthtml ='<option value=""></option>';
+                     for(var counter=0;counter<result.length;counter++){
+                        if(result[counter].id==subcategory_id){
+                            subjecthtml +='<option value="'+result[counter].id+'"'+ subcategoryselected+'>'+result[counter].name+'</option>';
+                        }else{
+                            subjecthtml +='<option value="'+result[counter].id+'">'+result[counter].name+'</option>';
+                        }
+                    }
+                    $("#subject_id").html(subjecthtml);
+                }
+               
+            } else {
+                   
+                        $("#subject_id").html('<option value="">---------</option>'); 
+              
+            }
+        
+            
+        
+        }).catch(function (error) {
+        
+            console.log(error);
+        
+        });
+    }
+        
+   $('#country_id').change(function(){
+    
+        var country_id = $("#country_id").val();
+           if(country_id==''){
+            country_id ='0';
+        }
+         var base_url='<?php echo env('BASE_URL')?>';
+        //$('#preview_name').html($("#name option:selected").text());
+          $.ajax({
+    
+            method: 'get',
+    
+            url: base_url+'/subject_list/'+country_id,
+    
+          
+    
+        }).then(response => {
+    
+            if (response.status == true) {
+    
+                var result = response.data
+              
+                
+                if(result.length>0){
+                    var subjecthtml ='<option value=""></option>';
+                     for(var counter=0;counter<result.length;counter++){
+                        subjecthtml +='<option value="'+result[counter].id+'">'+result[counter].name+'</option>';
+                    }
+                    $("#subject_id").html(subjecthtml);
+                }
+               
+            } else {
+                   
+                        $("#subject_id").html('<option value="">---------</option>'); 
+              
+            }
+    
+            
+    
+        }).catch(function (error) {
+    
+            console.log(error);
+    
+        });
+    });
+</script>
+@endsection
